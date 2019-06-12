@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cyzs.mapper.UserMapper">
+    <!--
+        eviction缓存清除策略，
+         可用的清除策略有：
+        LRU – 最近最少使用：移除最长时间不被使用的对象。
+        FIFO – 先进先出：按对象进入缓存的顺序来移除它们。
+        SOFT – 软引用：基于垃圾回收器状态和软引用规则移除对象。
+        WEAK – 弱引用：更积极地基于垃圾收集器状态和弱引用规则移除对象。
+        flushInterval多久清空一次
+        size缓存容量，type自定义缓存的类型，实现cache接口
+    -->
+    <cache  type="org.mybatis.caches.ehcache.EhcacheCache" >
+    </cache>
+    <!--
+        批量保存
+        boolean addUsers(@Param("users") List<User> users);
+    -->
+    <insert id="addUsers">
+        INSERT INTO user(username,sex,birthday,address,p_id)VALUES
+        <foreach collection="users" separator="," item="user">
+            (#{user.username},#{user.sex},#{user.birthday},#{user.address},#{user.dept.id})
+        </foreach>
+    </insert>
+    <!--
+        void deleteByIds(List<Integer> ids);
+    -->
+    <delete id="deleteByIds" >
+        DELETE FROM USER WHERE id IN
+        <foreach collection="ids" item="id" open="(" close=")" separator="," >
+            #{id}
+        </foreach>
+    </delete>
+
+
+
+    <!--
+       List<User> getUsersById(Integer id);
+    -->
+    <select id="getUsersById" resultType="user">
+        SELECT * FROM USER WHERE p_id=#{id}
+    </select>
+    <!--
+       自定义映射
+    -->
+    <resultMap id="userdef4" type="user">
+        <id column="" property=""/>
+        <result column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="sex" property="sex"/>
+        <result column="birthday" property="birthday"/>
+        <result column="address" property="address"/>
+        <!--
+            property属性名，select指定查询的语句，
+            column指定查询出的字段值传入另一个查询做参数
+        -->
+        <!--<association property="dept"
+                     select="com.cyzs.mapper.DeptMapper.getDeptById"
+                     column="p_id">
+        </association>-->
+        <!--
+            discriminator鉴别器
+        -->
+        <!--<discriminator javaType="Integer" column="sex">
+            <case value="0" resultType="department">
+                <association property="dept"
+                             select="com.cyzs.mapper.DeptMapper.getDeptById"
+                             column="p_id">
+                </association>
+            </case>
+            <case value="1" resultType="department">
+                <association property="dept"
+                             select="com.cyzs.mapper.DeptMapper.getDeptById"
+                             column="p_id">
+                </association>
+            </case>
+        </discriminator>-->
+    </resultMap>
+    <resultMap id="userdef3" type="user">
+        <id column="" property=""/>
+        <result column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="sex" property="sex"/>
+        <result column="birthday" property="birthday"/>
+        <result column="address" property="address"/>
+        <!--
+            property属性名，select指定查询的语句，
+            column指定查询出的字段值传入另一个查询做参数
+        -->
+        <association property="dept"
+                     select="com.cyzs.mapper.DeptMapper.getDeptById"
+                     column="p_id">
+        </association>
+    </resultMap>
+    <resultMap id="userdef" type="user">
+        <id column="" property=""/>
+        <result column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="sex" property="sex"/>
+        <result column="birthday" property="birthday"/>
+        <result column="address" property="address"/>
+        <result column="d_id" property="dept.id"/>
+        <result column="department" property="dept.departmentName"/>
+    </resultMap>
+    <resultMap id="userdef2" type="user">
+        <id column="" property=""/>
+        <result column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="sex" property="sex"/>
+        <result column="birthday" property="birthday"/>
+        <result column="address" property="address"/>
+        <!---->
+        <!--
+            property属性名，javaType封装的java类型
+        -->
+        <association property="dept" javaType="department">
+            <id column="d_id" property="id"/>
+            <result column="department" property="departmentName"/>
+        </association>
+    </resultMap>
+    <!--
+       User getUserAndDept(Integer id);
+    -->
+    <select id="getUserAndDept" resultMap="userdef2">
+        SELECT u.id id,u.username username,u.sex sex,u.birthday birthday,u.`address` address,d.id d_id,d.`department_name` department
+        FROM USER u,dept d WHERE u.id=d.`id` AND u.id=#{id};
+    </select>
+    <select id="getOne" resultMap="userdef3" useCache="true">
+        SELECT * FROM USER WHERE id=#{id}
+    </select>
+    <!--<select id="getOne" resultType="user" >
+        SELECT id,username,sex,birthday,address FROM USER WHERE id=#{param1} AND username=#{param2}
+    </select>-->
+    <insert id="addUser" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user(username,sex,birthday,address)VALUES
+        (#{username},#{sex},#{birthday},#{address})
+    </insert>
+    <delete id="deleteUserById" >
+        DELETE FROM USER WHERE id=#{id}
+    </delete>
+
+    <update id="updateUser">
+        UPDATE user
+        <trim prefix="set" suffixOverrides=",">
+            <if test="username !=null">username=#{username},</if>
+            <if test="sex !=null">sex=#{sex},</if>
+            <if test="birthday !=null">birthday=#{birthday},</if>
+            <if test="address !=null">address=#{address}</if>
+        </trim>
+        WHERE id=#{id}
+    </update>
+</mapper>

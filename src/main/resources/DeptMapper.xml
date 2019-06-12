@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cyzs.mapper.DeptMapper">
+
+    <!--
+        Department getDeptByIdStep(Integer id);
+    -->
+    <resultMap id="dept2" type="department">
+        <id column="id" property="id"/>
+        <result column="department_name" property="departmentName"/>
+        <association property="users" select="com.cyzs.mapper.UserMapper.getUsersById"
+                     column="id">
+            <!--多个参数传过去可以是 column="{p_id=id，key2=columeName}"-->
+        </association>
+
+    </resultMap>
+    <select id="getDeptByIdStep" resultMap="dept2">
+        SELECT id,department_name from dept where id=#{id}
+    </select>
+    <resultMap id="dept" type="department">
+        <id column="id" property="id"/>
+        <result column="department" property="departmentName"/>
+        <collection property="users" ofType="user">
+            <id column="u_id" property="id"/>
+            <result column="username" property="username"/>
+            <result column="sex" property="sex"/>
+            <result column="birthday" property="birthday"/>
+            <result column="address" property="address"/>
+        </collection>
+    </resultMap>
+    <!--Department getDeptByIdPlus(Integer id);-->
+    <select id="getDeptByIdPlus" resultMap="dept">
+        SELECT d.id id,d.`department_name` department,u.id u_id,u.username username
+        ,u.sex sex,u.birthday birthday,u.`address` address
+        FROM dept d LEFT JOIN USER u ON d.`id`=u.`p_id` WHERE d.`id`=#{id}
+    </select>
+    <!--Department getDeptById(Integer id);-->
+    <select id="getDeptById" resultType="department">
+        SELECT * from dept where id=#{id}
+    </select>
+</mapper>

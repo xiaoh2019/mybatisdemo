@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <properties resource="db.properties">
+    </properties>
+    <settings>
+        <!--开启驼峰匹配-->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <!--参数为null时，指定jdbc类型也为null，默认为other-->
+        <setting name="jdbcTypeForNull" value="NULL"></setting>
+        <!--开启延迟加载-->
+        <setting name="lazyLoadingEnabled" value="true"></setting>
+        <!--按需加载，关闭这个立即加载全部属性-->
+        <setting name="aggressiveLazyLoading" value="false"></setting>
+        <!--开启二级缓存-->
+        <setting name="cacheEnabled" value="true"/>
+    </settings>
+    <typeAliases>
+        <package name="entity"></package>
+    </typeAliases>
+    <environments default="dev">
+        <environment id="dev">
+            <transactionManager type="JDBC"></transactionManager>
+            <dataSource type="POOLED">
+                <property name="driver" value="${db.driver}"/>
+                <property name="url" value="${db.url}"/>
+                <property name="username" value="${db.username}"/>
+                <property name="password" value="${db.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <databaseIdProvider type="DB_VENDOR">
+        <property name="SQL Server" value="sqlserver"/>
+        <property name="DB2" value="db2"/>
+        <property name="Oracle" value="oracle" />
+        <property name="MySQL" value="mysql"/>
+    </databaseIdProvider>
+    <mappers>
+       <!-- <package name="com.cyzs.mapper"></package>-->
+        <mapper resource="UserMapper.xml"></mapper>
+        <mapper resource="DeptMapper.xml"></mapper>
+    </mappers>
+
+</configuration>
